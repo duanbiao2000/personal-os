@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personal OS — Research-Grade Operating System</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f0e0c;
+    --paper: #f5f2eb;
+    --cream: #ede9df;
+    --accent: #c8401a;
+    --accent2: #2d5a8e;
+    --muted: #7a7468;
+    --border: #d4cfc4;
+    --highlight: #f0e8c8;
+    --green: #2a6649;
+    --mono: 'JetBrains Mono', monospace;
+    --serif: 'Instrument Serif', serif;
+    --sans: 'Syne', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .site-header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 48px 64px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .site-header::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 320px; height: 320px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.12;
+  }
+  .site-header::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: 200px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: var(--accent2);
+    opacity: 0.15;
+  }
+  .header-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .header-title {
+    font-family: var(--serif);
+    font-size: clamp(36px, 5vw, 64px);
+    line-height: 1.1;
+    font-weight: 400;
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 1;
+  }
+  .header-title em {
+    font-style: italic;
+    color: #c8b898;
+  }
+  .header-sub {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: #888;
+    letter-spacing: 0.05em;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── NAV TABS ── */
+  .tab-nav {
+    display: flex;
+    background: var(--ink);
+    border-top: 1px solid #333;
+    padding: 0 64px;
+    gap: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .tab-btn {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #666;
+    background: none;
+    border: none;
+    padding: 14px 20px 12px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .tab-btn:hover { color: var(--paper); }
+  .tab-btn.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  /* ── MAIN ── */
+  .main { max-width: 1100px; margin: 0 auto; padding: 48px 64px; }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── SECTION TITLES ── */
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .section-title {
+    font-family: var(--serif);
+    font-size: 32px;
+    font-weight: 400;
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+  .section-desc {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 40px;
+    max-width: 600px;
+  }
+
+  /* ── CARDS ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+  }
+  .card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 28px;
+    position: relative;
+  }
+  .card-accent-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .bar-red { background: var(--accent); }
+  .bar-blue { background: var(--accent2); }
+  .bar-green { background: var(--green); }
+  .bar-gold { background: #b8960c; }
+
+  .card-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .card h3 {
+    font-family: var(--serif);
+    font-size: 20px;
+    font-weight: 400;
+    margin-bottom: 12px;
+  }
+  .card p { font-size: 13px; color: #444; line-height: 1.7; }
+
+  /* ── SOP BLOCKS ── */
+  .sop-block {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    margin-bottom: 32px;
+    overflow: hidden;
+  }
+  .sop-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 28px;
+    border-bottom: 1px solid var(--border);
+    background: var(--cream);
+  }
+  .sop-num {
+    font-family: var(--mono);
+    font-size: 28px;
+    font-weight: 300;
+    color: var(--accent);
+    min-width: 44px;
+  }
+  .sop-title-wrap {}
+  .sop-title { font-family: var(--serif); font-size: 20px; font-weight: 400; }
+  .sop-meta { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .sop-body { padding: 28px; }
+
+  .step-list { list-style: none; }
+  .step-item {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px dashed var(--border);
+  }
+  .step-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .step-dot {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--mono);
+    font-size: 11px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .step-content {}
+  .step-action { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+  .step-detail { font-size: 13px; color: #555; line-height: 1.6; }
+  .step-code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 8px 12px;
+    margin-top: 8px;
+    display: block;
+    white-space: pre-wrap;
+    color: var(--accent2);
+  }
+
+  /* ── TEMPLATE BLOCKS ── */
+  .template-box {
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 2px;
+    padding: 28px;
+    margin-bottom: 24px;
+    position: relative;
+  }
+  .template-box .tpl-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .template-box .tpl-title {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-style: italic;
+    color: #c8b898;
+    margin-bottom: 20px;
+  }
+  .template-field {
+    margin-bottom: 14px;
+  }
+  .template-field .field-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+  }
+  .template-field .field-value {
+    font-size: 13px;
+    color: #ccc;
+    line-height: 1.7;
+    padding-left: 12px;
+    border-left: 2px solid #333;
+  }
+  .template-field .field-value.fill {
+    color: #eee;
+    border-left-color: var(--accent);
+  }
+
+  /* ── CALENDAR ── */
+  .cal-week {
+    display: grid;
+    grid-template-columns: 80px repeat(7, 1fr);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 32px;
+    background: white;
+  }
+  .cal-header {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 10px 8px;
+    background: var(--ink);
+    color: var(--paper);
+    text-align: center;
+    border-right: 1px solid #333;
+  }
+  .cal-header:first-child { border-right: 1px solid #333; }
+  .time-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    padding: 6px 10px;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    text-align: right;
+    background: var(--cream);
+  }
+  .cal-cell {
+    padding: 4px;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    min-height: 36px;
+    vertical-align: top;
+  }
+  .cal-cell:last-child { border-right: none; }
+  .cal-event {
+    border-radius: 2px;
+    padding: 3px 6px;
+    font-size: 10px;
+    font-family: var(--mono);
+    line-height: 1.4;
+    margin-bottom: 2px;
+  }
+  .ev-deep { background: #1a3a5c; color: #9bb8d4; }
+  .ev-admin { background: #3a1a1a; color: #d4a0a0; }
+  .ev-meeting { background: #1a3a1a; color: #9dc49d; }
+  .ev-review { background: #3a2a0a; color: #d4b87a; }
+  .ev-personal { background: #2a1a3a; color: #b8a0d4; }
+  .ev-buffer { background: var(--cream); color: var(--muted); border: 1px dashed var(--border); }
+
+  /* ── PRINCIPLES ── */
+  .principle-row {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    background: white;
+  }
+  .principle-num {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--serif);
+    font-size: 24px;
+    font-style: italic;
+    width: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .principle-content { padding: 16px 20px; }
+  .principle-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+  .principle-body { font-size: 13px; color: #555; line-height: 1.6; }
+
+  /* ── METRICS ── */
+  .metrics-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 40px;
+    background: white;
+  }
+  .metric {
+    padding: 24px 20px;
+    border-right: 1px solid var(--border);
+    text-align: center;
+  }
+  .metric:last-child { border-right: none; }
+  .metric-val {
+    font-family: var(--serif);
+    font-size: 40px;
+    font-style: italic;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .metric-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+
+  /* ── HIGHLIGHT BOX ── */
+  .highlight-box {
+    background: var(--highlight);
+    border: 1px solid #d4c070;
+    border-radius: 2px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .highlight-box strong { color: var(--ink); }
+
+  /* ── DIVIDER ── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 40px 0;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .site-header, .tab-nav, .main { padding-left: 24px; padding-right: 24px; }
+    .metrics-row { grid-template-columns: repeat(2, 1fr); }
+    .cal-week { display: none; }
+    .tab-btn { padding: 14px 10px 12px; font-size: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-label">Personal Operating System v2.0</div>
+  <h1 class="header-title">The <em>Research-Grade</em><br>Life System</h1>
+  <p class="header-sub">SOP · Templates · Calendar Architecture · Execution Principles</p>
+</header>
+
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
+  <button class="tab-btn" onclick="switchTab('sop')">Daily SOPs</button>
+  <button class="tab-btn" onclick="switchTab('templates')">Templates</button>
+  <button class="tab-btn" onclick="switchTab('calendar')">Calendar</button>
+  <button class="tab-btn" onclick="switchTab('review')">Weekly Review</button>
+</nav>
+
+<main class="main">
+
+  <!-- ══ OVERVIEW ══ -->
+  <section id="tab-overview" class="tab-panel active">
+    <p class="section-label">System Design</p>
+    <h2 class="section-title">Why Systems Beat Willpower</h2>
+    <p class="section-desc">Design once, execute cheaply. Every repeated decision eliminated is cognitive budget returned to deep work.</p>
+
+    <div class="metrics-row">
+      <div class="metric">
+        <div class="metric-val">4h</div>
+        <div class="metric-label">Peak Deep Work / Day</div>
+      </div>
+      <div class="metric">
+        <div class="metric-val">90m</div>
+        <div class="metric-label">Deep Work Block</div>
+      </div>
+      <div class="metric">
+        <div class="metric-val">3</div>
+        <div class="metric-label">MIT Tasks / Day Max</div>
+      </div>
+      <div class="metric">
+        <div class="metric-val">52</div>
+        <div class="metric-label">Weekly Reviews / Year</div>
+      </div>
+    </div>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-accent-bar bar-red"></div>
+        <div class="card-tag">Layer 1</div>
+        <h3>Daily Rhythm</h3>
+        <p>Three fixed anchors: Morning Boot (20 min), Deep Work Blocks (2×90 min), Evening Shutdown (15 min). Everything else slots around these.</p>
+      </div>
+      <div class="card">
+        <div class="card-accent-bar bar-blue"></div>
+        <div class="card-tag">Layer 2</div>
+        <h3>Weekly Architecture</h3>
+        <p>Monday Planning + Friday Review as hard bookends. Themed days reduce context switching cost by ~40%. Admin batched to Tuesday PM.</p>
+      </div>
+      <div class="card">
+        <div class="card-accent-bar bar-green"></div>
+        <div class="card-tag">Layer 3</div>
+        <h3>Project Templates</h3>
+        <p>Every new project starts from a pre-built scaffold: goals, constraints, milestones, daily progress log, retrospective. Zero blank-page tax.</p>
+      </div>
+      <div class="card">
+        <div class="card-accent-bar bar-gold"></div>
+        <div class="card-tag">Layer 4</div>
+        <h3>Capture & Review Loops</h3>
+        <p>Weekly 45-min review processes all inboxes, updates OKRs, pre-loads next week. Monthly 2hr review recalibrates quarterly direction.</p>
+      </div>
+    </div>
+
+    <div class="highlight-box">
+      <strong>Core Principle:</strong> Your system should answer three questions instantly at any moment — <em>What should I be doing right now? What did I commit to this week? Am I on track toward my 90-day goal?</em> If it can't, the system isn't complete.
+    </div>
+
+    <hr class="divider">
+
+    <p class="section-label">Design Principles</p>
+    <h2 class="section-title">Operating Constraints</h2>
+    <p class="section-desc" style="margin-bottom:24px;">Rules that prevent the system from collapsing under load.</p>
+
+    <div class="principle-row">
+      <div class="principle-num">1</div>
+      <div class="principle-content">
+        <div class="principle-title">Capture Everything, Process Once</div>
+        <div class="principle-body">One inbox (physical + digital). Nothing lives in your head. Processing happens at fixed times, not continuously. Continuous processing destroys focus.</div>
+      </div>
+    </div>
+    <div class="principle-row">
+      <div class="principle-num">2</div>
+      <div class="principle-content">
+        <div class="principle-title">Time-Box Before You To-Do</div>
+        <div class="principle-body">Tasks go on the calendar, not a list. A list is a wish. A calendar block is a commitment. If it's not scheduled, it probably won't happen.</div>
+      </div>
+    </div>
+    <div class="principle-row">
+      <div class="principle-num">3</div>
+      <div class="principle-content">
+        <div class="principle-title">Protect the First 90 Minutes</div>
+        <div class="principle-body">No email, Slack, or meetings before your first deep work block completes. Your best cognitive hours belong to your most important work.</div>
+      </div>
+    </div>
+    <div class="principle-row">
+      <div class="principle-num">4</div>
+      <div class="principle-content">
+        <div class="principle-title">Distinguish Doing from Deciding</div>
+        <div class="principle-body">Planning sessions are for deciding. Work blocks are for doing. Never mix them — deciding during execution fragments both.</div>
+      </div>
+    </div>
+    <div class="principle-row">
+      <div class="principle-num">5</div>
+      <div class="principle-content">
+        <div class="principle-title">Debt-Free Closure</div>
+        <div class="principle-body">Every day ends with a shutdown ritual. Open loops create background anxiety. The shutdown converts open loops into scheduled actions, freeing RAM.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ SOPs ══ -->
+  <section id="tab-sop" class="tab-panel">
+    <p class="section-label">Standard Operating Procedures</p>
+    <h2 class="section-title">Daily Execution Protocols</h2>
+    <p class="section-desc">Each SOP is designed to run on autopilot. Read once, internalize, then execute from habit.</p>
+
+    <!-- Morning -->
+    <div class="sop-block">
+      <div class="sop-header">
+        <div class="sop-num">01</div>
+        <div class="sop-title-wrap">
+          <div class="sop-title">Morning Boot Sequence</div>
+          <div class="sop-meta">Duration: 20 min · Trigger: Wake + 30 min · Frequency: Daily</div>
+        </div>
+      </div>
+      <div class="sop-body">
+        <ul class="step-list">
+          <li class="step-item">
+            <div class="step-dot">1</div>
+            <div class="step-content">
+              <div class="step-action">Physical Activation (5 min)</div>
+              <div class="step-detail">10 min walk OR 20 push-ups + cold water on face. Goal: cortisol spike without phone. No screens until this is done.</div>
+            </div>
+          </li>
+          <li class="step-item">
+            <div class="step-dot">2</div>
+            <div class="step-content">
+              <div class="step-action">Daily Preview (5 min)</div>
+              <div class="step-detail">Open calendar only. Identify today's 3 MIT (Most Important Tasks). Write them on a physical index card. Do not open email.</div>
+              <code class="step-code">MIT-1: [the thing that moves the needle most]
+MIT-2: [second priority]
+MIT-3: [third, or a batch of small things]
+AVOID today: [specific distraction to pre-commit against]</code>
+            </div>
+          </li>
+          <li class="step-item">
+            <div class="step-dot">3</div>
+            <div class="step-content">
+              <div class="step-action">Pre-Load Deep Work Context (5 min)</div>
+              <div class="step-detail">Open exactly the files/tabs needed for DW Block 1. Close everything else. Set a 90-min timer. Phone in another room.</div>
+            </div>
+          </li>
+          <li class="step-item">
+            <div class="step-dot">4</div>
+            <div class="step-content">
+              <div class="step-action">Intention Sentence (2 min)</div>
+              <div class="step-detail">Write one sentence: "Today I will have made meaningful progress if _______." This is your success criterion. Check it at shutdown.</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Deep Work -->
+    <div class="sop-block">
+      <div class="sop-header">
+        <div class="sop-num">02</div>
+        <div class="sop-title-wrap">
+          <div class="sop-title">Deep Work Block Protocol</div>
+          <div class="sop-meta">Duration: 90 min · Sessions: 2/day · Frequency: Mon–Fri</div>
+        </div>
+      </div>
+      <div class="sop-body">
+        <ul class="step-list">
+          <li class="step-item">
+            <div class="step-dot">1</div>
+            <div class="step-content">
+              <div class="step-action">Entry Ritual (3 min)</div>
+              <div class="step-detail">Same ritual every time: make drink, put on one specific playlist (instrumental only), write the micro-goal for this 90-min session at top of scratch doc.</div>
+              <code class="step-code">Session goal: [one specific deliverable, e.g. "draft section 2.3" not "work on paper"]
+Time-box: 90 min ending at ___:___
+Success = [concrete output]</code>
+            </div>
+          </li>
+          <li class="step-item">
+            <div class="step-dot">2</div>
+            <div class="step-content">
+              <div class="step-action">Distraction Capture (during)</div>
+              <div class="step-detail">Keep a sticky note beside keyboard. Any thought that pulls attention ("should check X", "need to email Y") goes on the note, not in your head or browser. Review after session ends.</div>
+            </div>
+          </li>
+          <li class="step-item">
+            <div class="step-dot">3</div>
+            <div class="step-content">
+              <div class="step-action">Pomodoro Override Rule</div>
+              <div class="step-detail">If in flow state when 25-min pomodoro rings: IGNORE it, keep going. The 90-min outer limit is the real boundary. Pomodoro is a floor, not a ceiling.</div>
+            </div>
+          </li>
+          <li class="step-item">
+            <div class="step-dot">4</div>
+            <div class="step-content">
+              <div class="step-action">Exit Note (5 min)</div>
+              <div class="step-detail">Critical: before stopping, write 3 lines. This is the "warm handoff" to your future self — eliminates re-entry cost next session.</div>
+              <code class="step-code">Completed: [what actually got done]
+Stuck on: [specific blocker if any]
+Next action: [exact first step to continue]</code>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Shutdown -->
+    <div class="sop-block">
+      <div class="sop-header">
+        <div class="sop-num">03</div>
+        <div class="sop-title-wrap">
+          <div class="sop-title">Daily Shutdown Ritual</div>
+          <div class="sop-meta">Duration: 15 min · Trigger: Last work hour · Frequency: Daily</div>
+        </div>
+      </div>
+      <div class="sop-body">
+        <ul class="step-list">
+          <li class="step-item">
+            <div class="step-dot">1</div>
+            <div class="step-content">
+              <div class="step-action">Capture Sweep (5 min)</div>
+              <div class="step-detail">Process all physical notes, Slack mentions, email subjects. Don't respond — just capture as tasks in your system. Goal: zero open loops in your head.</div>
+            </div>
+          </li>
+          <li class="step-item">
+            <div class="step-dot">2</div>
+            <div class="step-content">
+              <div class="step-action">Calendar Check Tomorrow (3 min)</div>
+              <div class="step-detail">Scan tomorrow's schedule. Pre-decide: is anything scheduled that shouldn't be? Add any prep time needed. Confirm tomorrow's MIT-1 is blocked.</div>
+            </div>
+          </li>
+          <li class="step-item">
+            <div class="step-dot">3</div>
+            <div class="step-content">
+              <div class="step-action">Wins + Intentions Log (5 min)</div>
+              <div class="step-detail">Write 3 lines in your daily log. Not for motivation — for calibration data. These become the raw material for weekly review.</div>
+              <code class="step-code">WIN: [one thing that worked]
+LEARN: [one thing to adjust]
+TOMORROW: [the single thing I'm most focused on]</code>
+            </div>
+          </li>
+          <li class="step-item">
+            <div class="step-dot">4</div>
+            <div class="step-content">
+              <div class="step-action">Shutdown Complete Phrase</div>
+              <div class="step-detail">Say out loud or write: "Shutdown complete." Sounds silly, works clinically. Creates a psychological boundary between work mode and rest mode. Work is done.</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ TEMPLATES ══ -->
+  <section id="tab-templates" class="tab-panel">
+    <p class="section-label">Reusable Templates</p>
+    <h2 class="section-title">Zero Blank-Page Tax</h2>
+    <p class="section-desc">Copy, fill brackets, execute. Design the template once; never start from scratch again.</p>
+
+    <!-- Daily Log -->
+    <div class="template-box">
+      <div class="tpl-label">Template 01 — Daily</div>
+      <div class="tpl-title">Daily Log Entry</div>
+      <div class="template-field">
+        <div class="field-label">Date + Energy Level</div>
+        <div class="field-value fill">[YYYY-MM-DD] · Energy: ___/5 · Sleep: ___h</div>
+      </div>
+      <div class="template-field">
+        <div class="field-label">Intention</div>
+        <div class="field-value fill">Today matters if: [one sentence]</div>
+      </div>
+      <div class="template-field">
+        <div class="field-label">MIT 1–3</div>
+        <div class="field-value fill">☐ [MIT-1: specific deliverable]<br>☐ [MIT-2]<br>☐ [MIT-3 or batch]</div>
+      </div>
+      <div class="template-field">
+        <div class="field-label">Deep Work Sessions</div>
+        <div class="field-value">DW1: [___:___ → ___:___] · Task: ___ · Output: ___<br>DW2: [___:___ → ___:___] · Task: ___ · Output: ___</div>
+      </div>
+      <div class="template-field">
+        <div class="field-label">Shutdown Summary</div>
+        <div class="field-value fill">WIN: ___<br>ADJUST: ___<br>TOMORROW FOCUS: ___</div>
+      </div>
+    </div>
+
+    <!-- Weekly Plan -->
+    <div class="template-box">
+      <div class="tpl-label">Template 02 — Weekly</div>
+      <div class="tpl-title">Monday Planning Doc</div>
+      <div class="template-field">
+        <div class="field-label">Week Of</div>
+        <div class="field-value fill">Week [N] · [Mon date] – [Fri date]</div>
+      </div>
+      <div class="template-field">
+        <div class="field-label">This Week's Single Most Important Outcome</div>
+        <div class="field-value fill">[One sentence. If you accomplish nothing else, accomplish this.]</div>
+      </div>
+      <div class="template-field">
+        <div class="field-label">Project Priorities (Top 3)</div>
+        <div class="field-value fill">P1: [Project] → [Specific milestone to hit this week]<br>P2: [Project] → [Milestone]<br>P3: [Project] → [Milestone]</div>
+      </div>
+      <div class="template-field">
+        <div class="field-label">Scheduled Commitments</div>
+        <div class="field-value">Mon: ___ Tue: ___ Wed: ___ Thu: ___ Fri: ___</div>
+      </div>
+      <div class="template-field">
+        <div class="field-label">Energy & Constraints</div>
+        <div class="field-value fill">High-energy days: [Mon/Tue/Wed/Thu/Fri]<br>Protected DW time: ___:___ – ___:___<br>Constraints this week: [travel/deadline/etc]</div>
+      </div>
+      <div class="template-field">
+        <div class="field-label">Pre-Mortem: What could derail this week?</div>
+        <div class="field-value fill">[Name 1-2 risks] → [mitigation]</div>
+      </div>
+    </div>
+
+    <!-- Project Scaffold -->
+    <div class="template-box">
+      <div class="tpl-label">Template 03 — Project</div>
+      <div class="tpl-title">New Project Scaffold</div>
+      <div class="template-field">
+        <div class="field-label">Project Name + Owner</div>
+        <div class="field-value fill">[Name] · Owner: [you] · Start: ___ · Target: ___</div>
+      </div>
+      <div class="template-field">
+        <div class="field-label">North Star (Why This Matters)</div>
+        <div class="field-value fill">[One sentence on the real outcome. Not tasks — impact.]</div>
+      </div>
+      <div class="template-field">
+        <div class="field-label">Definition of Done</div>
+        <div class="field-value fill">This project is COMPLETE when:<br>☐ [Criterion 1 — measurable]<br>☐ [Criterion 2]<br>☐ [Criterion 3]</div>
+      </div>
+      <div class="template-field">
+        <div class="field-label">Key Milestones</div>
+        <div class="field-value fill">M1: [___] by [date]<br>M2: [___] by [date]<br>M3: [___] by [date — = Done]</div>
+      </div>
+      <div class="template-field">
+        <div class="field-label">Resources / Dependencies</div>
+        <div class="field-value">Blocked by: ___ · Need from: ___ · Budget: ___</div>
+      </div>
+      <div class="template-field">
+        <div class="field-label">Weekly Progress Log (append each week)</div>
+        <div class="field-value fill">[YYYY-WW]: [1-line progress note] · Status: On Track / At Risk / Behind</div>
+      </div>
+    </div>
+
+    <!-- Decision Log -->
+    <div class="template-box">
+      <div class="tpl-label">Template 04 — Meta</div>
+      <div class="tpl-title">Decision Log Entry</div>
+      <div class="template-field">
+        <div class="field-label">Decision</div>
+        <div class="field-value fill">[What you decided, in one sentence]</div>
+      </div>
+      <div class="template-field">
+        <div class="field-label">Context & Options Considered</div>
+        <div class="field-value fill">Option A: ___ (pros/cons)<br>Option B: ___ (pros/cons)<br>Chose: A/B because ___</div>
+      </div>
+      <div class="template-field">
+        <div class="field-label">Review Trigger</div>
+        <div class="field-value fill">Revisit this decision if: [condition] or by [date]</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ CALENDAR ══ -->
+  <section id="tab-calendar" class="tab-panel">
+    <p class="section-label">Time Architecture</p>
+    <h2 class="section-title">Ideal Week Structure</h2>
+    <p class="section-desc">Themed days reduce context-switching. This is a starting template — adapt to your constraints, protect the deep work blocks ruthlessly.</p>
+
+    <div class="highlight-box">
+      <strong>Calendar Logic:</strong> Deep work (navy) is scheduled first and treated as immovable. Everything else — meetings, admin, email — fills the remaining space. Never the reverse.
+    </div>
+
+    <!-- Legend -->
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;">
+      <span style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;"><span style="width:12px;height:12px;background:#1a3a5c;border-radius:2px;display:inline-block"></span> Deep Work</span>
+      <span style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;"><span style="width:12px;height:12px;background:#1a3a1a;border-radius:2px;display:inline-block"></span> Meetings</span>
+      <span style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;"><span style="width:12px;height:12px;background:#3a1a1a;border-radius:2px;display:inline-block"></span> Admin/Email</span>
+      <span style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;"><span style="width:12px;height:12px;background:#3a2a0a;border-radius:2px;display:inline-block"></span> Review/Plan</span>
+      <span style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;"><span style="width:12px;height:12px;background:#2a1a3a;border-radius:2px;display:inline-block"></span> Personal</span>
+    </div>
+
+    <div class="cal-week">
+      <!-- Headers -->
+      <div class="cal-header">TIME</div>
+      <div class="cal-header">MON<br><span style="color:#888;font-size:9px">PLANNING</span></div>
+      <div class="cal-header">TUE<br><span style="color:#888;font-size:9px">DEEP</span></div>
+      <div class="cal-header">WED<br><span style="color:#888;font-size:9px">COLLAB</span></div>
+      <div class="cal-header">THU<br><span style="color:#888;font-size:9px">DEEP</span></div>
+      <div class="cal-header">FRI<br><span style="color:#888;font-size:9px">REVIEW</span></div>
+      <div class="cal-header">SAT<br><span style="color:#888;font-size:9px">FLEX</span></div>
+      <div class="cal-header">SUN<br><span style="color:#888;font-size:9px">REST</span></div>
+
+      <!-- 6:00 -->
+      <div class="time-label">06:00</div>
+      <div class="cal-cell"><div class="cal-event ev-personal">Exercise</div></div>
+      <div class="cal-cell"><div class="cal-event ev-personal">Exercise</div></div>
+      <div class="cal-cell"><div class="cal-event ev-personal">Exercise</div></div>
+      <div class="cal-cell"><div class="cal-event ev-personal">Exercise</div></div>
+      <div class="cal-cell"><div class="cal-event ev-personal">Exercise</div></div>
+      <div class="cal-cell"><div class="cal-event ev-personal">Long run / gym</div></div>
+      <div class="cal-cell"><div class="cal-event ev-personal">Rest</div></div>
+
+      <!-- 7:30 -->
+      <div class="time-label">07:30</div>
+      <div class="cal-cell"><div class="cal-event ev-review">Week Plan 45m</div></div>
+      <div class="cal-cell"><div class="cal-event ev-admin">Morning Boot</div></div>
+      <div class="cal-cell"><div class="cal-event ev-admin">Morning Boot</div></div>
+      <div class="cal-cell"><div class="cal-event ev-admin">Morning Boot</div></div>
+      <div class="cal-cell"><div class="cal-event ev-admin">Morning Boot</div></div>
+      <div class="cal-cell"><div class="cal-event ev-personal">Slow morning</div></div>
+      <div class="cal-cell"><div class="cal-event ev-personal">No schedule</div></div>
+
+      <!-- 9:00 -->
+      <div class="time-label">09:00</div>
+      <div class="cal-cell"><div class="cal-event ev-deep">Deep Work #1</div></div>
+      <div class="cal-cell"><div class="cal-event ev-deep">Deep Work #1</div></div>
+      <div class="cal-cell"><div class="cal-event ev-deep">Deep Work #1</div></div>
+      <div class="cal-cell"><div class="cal-event ev-deep">Deep Work #1</div></div>
+      <div class="cal-cell"><div class="cal-event ev-deep">Deep Work #1</div></div>
+      <div class="cal-cell"><div class="cal-event ev-personal">Personal project</div></div>
+      <div class="cal-cell"><div class="cal-event ev-personal">Rest / Social</div></div>
+
+      <!-- 10:30 -->
+      <div class="time-label">10:30</div>
+      <div class="cal-cell"><div class="cal-event ev-buffer">Buffer / Walk</div></div>
+      <div class="cal-cell"><div class="cal-event ev-buffer">Buffer</div></div>
+      <div class="cal-cell"><div class="cal-event ev-meeting">1:1 or Standup</div></div>
+      <div class="cal-cell"><div class="cal-event ev-buffer">Buffer</div></div>
+      <div class="cal-cell"><div class="cal-event ev-buffer">Buffer</div></div>
+      <div class="cal-cell"></div>
+      <div class="cal-cell"></div>
+
+      <!-- 11:00 -->
+      <div class="time-label">11:00</div>
+      <div class="cal-cell"><div class="cal-event ev-deep">Deep Work #2</div></div>
+      <div class="cal-cell"><div class="cal-event ev-deep">Deep Work #2</div></div>
+      <div class="cal-cell"><div class="cal-event ev-meeting">Meeting block</div></div>
+      <div class="cal-cell"><div class="cal-event ev-deep">Deep Work #2</div></div>
+      <div class="cal-cell"><div class="cal-event ev-deep">Deep Work #2</div></div>
+      <div class="cal-cell"></div>
+      <div class="cal-cell"></div>
+
+      <!-- 12:30 -->
+      <div class="time-label">12:30</div>
+      <div class="cal-cell"><div class="cal-event ev-personal">Lunch + Walk</div></div>
+      <div class="cal-cell"><div class="cal-event ev-personal">Lunch + Walk</div></div>
+      <div class="cal-cell"><div class="cal-event ev-personal">Lunch</div></div>
+      <div class="cal-cell"><div class="cal-event ev-personal">Lunch + Walk</div></div>
+      <div class="cal-cell"><div class="cal-event ev-personal">Lunch</div></div>
+      <div class="cal-cell"><div class="cal-event ev-personal">Lunch</div></div>
+      <div class="cal-cell"><div class="cal-event ev-personal">Lunch</div></div>
+
+      <!-- 14:00 -->
+      <div class="time-label">14:00</div>
+      <div class="cal-cell"><div class="cal-event ev-meeting">Meeting window</div></div>
+      <div class="cal-cell"><div class="cal-event ev-admin">Email/Admin</div></div>
+      <div class="cal-cell"><div class="cal-event ev-meeting">Meeting window</div></div>
+      <div class="cal-cell"><div class="cal-event ev-admin">Email/Admin</div></div>
+      <div class="cal-cell"><div class="cal-event ev-review">Weekly Review</div></div>
+      <div class="cal-cell"><div class="cal-event ev-personal">Social / Rest</div></div>
+      <div class="cal-cell"><div class="cal-event ev-personal">Prep week</div></div>
+
+      <!-- 16:00 -->
+      <div class="time-label">16:00</div>
+      <div class="cal-cell"><div class="cal-event ev-admin">Email process</div></div>
+      <div class="cal-cell"><div class="cal-event ev-buffer">Light tasks</div></div>
+      <div class="cal-cell"><div class="cal-event ev-admin">Email process</div></div>
+      <div class="cal-cell"><div class="cal-event ev-buffer">Light tasks</div></div>
+      <div class="cal-cell"><div class="cal-event ev-review">Month check-in</div></div>
+      <div class="cal-cell"></div>
+      <div class="cal-cell"><div class="cal-event ev-review">Next week preview</div></div>
+
+      <!-- 17:30 -->
+      <div class="time-label">17:30</div>
+      <div class="cal-cell"><div class="cal-event ev-admin">Shutdown ritual</div></div>
+      <div class="cal-cell"><div class="cal-event ev-admin">Shutdown ritual</div></div>
+      <div class="cal-cell"><div class="cal-event ev-admin">Shutdown ritual</div></div>
+      <div class="cal-cell"><div class="cal-event ev-admin">Shutdown ritual</div></div>
+      <div class="cal-cell"><div class="cal-event ev-admin">Shutdown ritual</div></div>
+      <div class="cal-cell"></div>
+      <div class="cal-cell"></div>
+    </div>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-accent-bar bar-red"></div>
+        <div class="card-tag">Theme Logic</div>
+        <h3>Why Themed Days Work</h3>
+        <p>Context switch cost is real — studies show 15–25 min recovery per switch. Collab day (Wed) batches all social cognitive load. Deep days (Tue/Thu) have no meetings before noon by policy.</p>
+      </div>
+      <div class="card">
+        <div class="card-accent-bar bar-blue"></div>
+        <div class="card-tag">Email Policy</div>
+        <h3>Batch Processing Only</h3>
+        <p>Email twice daily: 11:30 AM and 4:00 PM. Auto-responder if needed: "I check email at 11:30 and 16:00. For urgent matters, call." Most urgency is manufactured.</p>
+      </div>
+      <div class="card">
+        <div class="card-accent-bar bar-green"></div>
+        <div class="card-tag">Meeting Rules</div>
+        <h3>Meeting Hygiene</h3>
+        <p>All meetings have a written agenda sent 24h before. Default 30 min, not 60. Every meeting ends with written next actions + owner. No agenda = you decline or convert to async.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ WEEKLY REVIEW ══ -->
+  <section id="tab-review" class="tab-panel">
+    <p class="section-label">Feedback Loop</p>
+    <h2 class="section-title">Weekly Review Protocol</h2>
+    <p class="section-desc">The most important system ritual. Skipping it is how systems die. 45 minutes every Friday. Non-negotiable.</p>
+
+    <div class="sop-block">
+      <div class="sop-header">
+        <div class="sop-num">WR</div>
+        <div class="sop-title-wrap">
+          <div class="sop-title">Friday Weekly Review — Full Protocol</div>
+          <div class="sop-meta">Duration: 45 min · Trigger: Friday 14:00 · Output: Next week pre-loaded</div>
+        </div>
+      </div>
+      <div class="sop-body">
+        <ul class="step-list">
+          <li class="step-item">
+            <div class="step-dot">1</div>
+            <div class="step-content">
+              <div class="step-action">Capture Clear (5 min)</div>
+              <div class="step-detail">Process all open inboxes to zero: physical inbox, email inbox, notes app, Slack DMs. Everything either becomes a task, gets deleted, or gets filed. If it takes &lt;2 min, do it now.</div>
+            </div>
+          </li>
+          <li class="step-item">
+            <div class="step-dot">2</div>
+            <div class="step-content">
+              <div class="step-action">Review the Week (10 min)</div>
+              <div class="step-detail">Read back through this week's daily logs. What actually happened vs what was planned? Calculate your MIT completion rate. Be honest, not harsh.</div>
+              <code class="step-code">MITs planned: ___  |  MITs completed: ___  |  Rate: ___%
+Biggest win: ___
+Biggest miss: ___
+Pattern I noticed: ___</code>
+            </div>
+          </li>
+          <li class="step-item">
+            <div class="step-dot">3</div>
+            <div class="step-content">
+              <div class="step-action">Project Status Sweep (10 min)</div>
+              <div class="step-detail">For each active project: update status, check if on track vs target date. Identify any project that needs escalated attention next week. Archive anything stalled for 3+ weeks.</div>
+              <code class="step-code">For each project:
+[Name] → Status: [On Track / At Risk / Behind / Done]
+Progress this week: ___
+Next action: ___ by ___</code>
+            </div>
+          </li>
+          <li class="step-item">
+            <div class="step-dot">4</div>
+            <div class="step-content">
+              <div class="step-action">90-Day Goal Check (5 min)</div>
+              <div class="step-detail">Review your current 90-day goals (you should have 1–3, not 10). Are you on track? Does this week's work connect to them? If not, something is misaligned.</div>
+            </div>
+          </li>
+          <li class="step-item">
+            <div class="step-dot">5</div>
+            <div class="step-content">
+              <div class="step-action">Next Week Pre-Load (10 min)</div>
+              <div class="step-detail">Open next week's Monday Planning template. Fill it out now while context is fresh. Pre-schedule the 2 deep work sessions for your highest priority. This is what makes Monday effortless.</div>
+            </div>
+          </li>
+          <li class="step-item">
+            <div class="step-dot">6</div>
+            <div class="step-content">
+              <div class="step-action">System Health Check (5 min)</div>
+              <div class="step-detail">Is the system working? What friction point annoyed you this week? Adjust one thing. Systems that can't evolve die. Small iterative improvements compound dramatically.</div>
+              <code class="step-code">Friction I noticed: ___
+System tweak for next week: ___
+Energy management note: ___</code>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="highlight-box">
+      <strong>Monthly Calibration (first Friday of month, +30 min):</strong> Review last 4 weekly reviews. Update your 90-day goals if needed. Ask: "Is how I'm spending time aligned with what I actually care about?" This is the only question that matters at the monthly level.
+    </div>
+
+    <hr class="divider">
+
+    <p class="section-label">Implementation</p>
+    <h2 class="section-title">How to Activate This System</h2>
+    <p class="section-desc" style="margin-bottom:24px;">Don't implement everything at once. Staged rollout over 4 weeks.</p>
+
+    <div class="principle-row">
+      <div class="principle-num">W1</div>
+      <div class="principle-content">
+        <div class="principle-title">Week 1: Install the Daily Anchors Only</div>
+        <div class="principle-body">Morning boot + shutdown ritual. Nothing else. Do these for 7 days until they're automatic. Don't add templates yet.</div>
+      </div>
+    </div>
+    <div class="principle-row">
+      <div class="principle-num">W2</div>
+      <div class="principle-content">
+        <div class="principle-title">Week 2: Add Deep Work Blocks</div>
+        <div class="principle-body">Block 2×90 min in your calendar as recurring. Treat as meetings you can't cancel. Use the entry/exit note protocol. Track actual output.</div>
+      </div>
+    </div>
+    <div class="principle-row">
+      <div class="principle-num">W3</div>
+      <div class="principle-content">
+        <div class="principle-title">Week 3: First Weekly Review</div>
+        <div class="principle-body">Run the Friday review protocol for the first time. Use the weekly planning template on Monday. Notice what doesn't fit your context and adapt.</div>
+      </div>
+    </div>
+    <div class="principle-row">
+      <div class="principle-num">W4</div>
+      <div class="principle-content">
+        <div class="principle-title">Week 4: Full System Live</div>
+        <div class="principle-body">Add the project scaffold template and calendar theming. The system is now running. Your job from here: do the reviews, resist the urge to over-engineer, and let compounding happen.</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+function switchTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
