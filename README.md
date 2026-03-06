@@ -9,7 +9,7 @@
 
 A single-file, zero-dependency personal productivity system built on the principle that **systems beat willpower**. Inspired by research workflows at top institutions — where output quality depends not just on effort, but on how that effort is structured.
 
-**[→ Live Demo](https://your-username.github.io/personal-os)**
+**[→ Live Demo](https://duanbiao2000.github.io/personal-os)**
 
 ---
 
