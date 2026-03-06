@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quarterly Review — Personal OS Wiki</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f0e0c; --paper: #f5f2eb; --cream: #ede9df;
+    --accent: #c8401a; --accent2: #2d5a8e; --muted: #7a7468;
+    --border: #d4cfc4; --highlight: #f0e8c8; --green: #2a6649;
+    --mono: 'JetBrains Mono', monospace;
+    --serif: 'Instrument Serif', serif;
+    --sans: 'Syne', sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.6; }
+
+  .breadcrumb { background: var(--ink); padding: 14px 64px; display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; }
+  .breadcrumb a { color: #888; text-decoration: none; transition: color 0.2s; }
+  .breadcrumb a:hover { color: var(--accent); }
+  .breadcrumb .sep { color: #444; }
+  .breadcrumb .current { color: var(--paper); }
+
+  .page-header { background: var(--ink); color: var(--paper); padding: 48px 64px 44px; border-top: 1px solid #222; position: relative; overflow: hidden; }
+  .page-header::before { content: ''; position: absolute; top: -60px; right: -60px; width: 300px; height: 300px; border-radius: 50%; background: var(--green); opacity: 0.1; }
+  .wiki-tag { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: #9dc49d; margin-bottom: 12px; }
+  .page-title { font-family: var(--serif); font-size: clamp(32px, 4vw, 56px); line-height: 1.1; font-weight: 400; margin-bottom: 12px; }
+  .page-title em { font-style: italic; color: #c8b898; }
+  .page-subtitle { font-family: var(--mono); font-size: 12px; color: #888; max-width: 600px; }
+
+  .page-body { display: grid; grid-template-columns: 1fr 280px; gap: 48px; max-width: 1100px; margin: 0 auto; padding: 48px 64px; }
+
+  .sidebar-box { background: white; border: 1px solid var(--border); border-radius: 2px; padding: 20px; margin-bottom: 20px; position: sticky; top: 20px; }
+  .sidebar-label { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--muted); margin-bottom: 12px; }
+  .sidebar-link { display: block; font-size: 13px; color: var(--ink); text-decoration: none; padding: 6px 0; border-bottom: 1px dashed var(--border); transition: color 0.2s; }
+  .sidebar-link:last-child { border-bottom: none; }
+  .sidebar-link:hover { color: var(--accent); }
+  .sidebar-link .sl-num { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-right: 8px; }
+  .related-link { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--accent2); text-decoration: none; padding: 8px 0; border-bottom: 1px dashed var(--border); transition: color 0.2s; }
+  .related-link:last-child { border-bottom: none; }
+  .related-link:hover { color: var(--accent); }
+  .related-link::before { content: '→'; font-family: var(--mono); font-size: 11px; }
+
+  .section-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; margin-top: 48px; }
+  .section-label:first-child { margin-top: 0; }
+  .section-title { font-family: var(--serif); font-size: 28px; font-weight: 400; margin-bottom: 16px; }
+  p.body-text { font-size: 14px; color: #444; line-height: 1.8; margin-bottom: 16px; }
+  .highlight-box { background: var(--highlight); border: 1px solid #d4c070; border-radius: 2px; padding: 18px 22px; margin: 20px 0; font-size: 13px; line-height: 1.7; }
+  hr.divider { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+
+  /* TIMELINE */
+  .timeline { margin: 24px 0; }
+  .tl-row { display: flex; gap: 0; margin-bottom: 0; }
+  .tl-time {
+    width: 80px;
+    flex-shrink: 0;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    padding-top: 18px;
+    text-align: right;
+    padding-right: 20px;
+  }
+  .tl-line {
+    width: 2px;
+    background: var(--border);
+    flex-shrink: 0;
+    position: relative;
+  }
+  .tl-line::before {
+    content: '';
+    position: absolute;
+    top: 20px; left: -4px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .tl-content {
+    flex: 1;
+    padding: 14px 20px 28px;
+  }
+  .tl-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+  .tl-body { font-size: 13px; color: #555; line-height: 1.6; }
+
+  /* QUESTION BLOCKS */
+  .q-block {
+    background: white;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 2px 2px 0;
+    padding: 18px 22px;
+    margin-bottom: 14px;
+  }
+  .q-block .q-num { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 6px; }
+  .q-block .q-text { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+  .q-block .q-why { font-size: 12px; color: #666; line-height: 1.6; }
+  .q-block.q-blue { border-left-color: var(--accent2); }
+  .q-block.q-green { border-left-color: var(--green); }
+
+  /* TEMPLATE */
+  .tpl-fill {
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 2px;
+    padding: 22px 26px;
+    margin: 20px 0;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 2;
+  }
+  .tpl-fill .tf-label { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+  .tpl-fill .tf-section { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent2); margin-top: 14px; margin-bottom: 6px; border-top: 1px solid #222; padding-top: 10px; }
+  .tpl-fill .tf-field { color: #aaa; }
+  .tpl-fill .tf-fill { color: #c8b898; }
+  .tpl-fill .tf-comment { color: #444; font-size: 11px; }
+
+  /* CADENCE GRID */
+  .cadence-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin: 20px 0;
+  }
+  .cg-cell {
+    padding: 20px;
+    border-right: 1px solid var(--border);
+    background: white;
+  }
+  .cg-cell:last-child { border-right: none; }
+  .cg-header {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .cg-title { font-family: var(--serif); font-size: 18px; font-style: italic; color: var(--ink); margin-bottom: 8px; }
+  .cg-meta { font-size: 12px; color: #666; line-height: 1.6; }
+  .cg-time { font-family: var(--mono); font-size: 20px; color: var(--accent); margin-top: 12px; }
+
+  /* REFLECTION MATRIX */
+  .matrix {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin: 20px 0;
+  }
+  .matrix-cell {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 18px;
+  }
+  .mc-quadrant {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .mc-title { font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+  .mc-prompt { font-size: 12px; color: #666; line-height: 1.6; font-style: italic; }
+
+  .page-nav { background: var(--cream); border-top: 1px solid var(--border); padding: 24px 64px; display: flex; justify-content: space-between; align-items: center; }
+  .nav-link { display: flex; flex-direction: column; text-decoration: none; color: var(--ink); transition: color 0.2s; }
+  .nav-link:hover { color: var(--accent); }
+  .nav-link .nl-label { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 4px; }
+  .nav-link .nl-title { font-size: 14px; font-weight: 600; }
+  .nav-link.right { text-align: right; }
+
+  @media (max-width: 768px) {
+    .breadcrumb, .page-header, .page-nav { padding-left: 24px; padding-right: 24px; }
+    .page-body { grid-template-columns: 1fr; padding: 24px; }
+    .side-col { display: none; }
+    .cadence-grid, .matrix { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="breadcrumb">
+  <a href="index.html">Personal OS</a>
+  <span class="sep">/</span>
+  <a href="index.html#tab-review">Weekly Review</a>
+  <span class="sep">/</span>
+  <span class="current">Quarterly Review</span>
+</div>
+
+<header class="page-header">
+  <div class="wiki-tag">Wiki · Quarterly Cadence</div>
+  <h1 class="page-title">The <em>Quarterly Review</em></h1>
+  <p class="page-subtitle">2 hours, four times a year. The highest-leverage planning session in the system — recalibrates direction before drift becomes damage.</p>
+</header>
+
+<div class="page-body">
+  <div class="main-col">
+
+    <p class="section-label">The Three-Level Review Hierarchy</p>
+    <h2 class="section-title">How Reviews Stack</h2>
+
+    <p class="body-text">Reviews operate at three temporal resolutions. Each level asks a different question and requires different cognitive mode. Confusing them — doing strategic thinking at weekly review cadence, or doing tactical planning at the quarterly — is a common failure mode.</p>
+
+    <div class="cadence-grid">
+      <div class="cg-cell">
+        <div class="cg-header">Weekly · Every Friday</div>
+        <div class="cg-title">Navigation</div>
+        <div class="cg-meta">Am I executing the plan? What's working this week? Close loops, pre-load next week.</div>
+        <div class="cg-time">45m</div>
+      </div>
+      <div class="cg-cell">
+        <div class="cg-header">Monthly · First Friday</div>
+        <div class="cg-title">Calibration</div>
+        <div class="cg-meta">Is the plan still right? Pattern recognition across 4 weeks. OKR trajectory check. One adjustment allowed.</div>
+        <div class="cg-time">+30m</div>
+      </div>
+      <div class="cg-cell">
+        <div class="cg-header">Quarterly · End of Q</div>
+        <div class="cg-title">Recalibration</div>
+        <div class="cg-meta">Are my goals still the right goals? Full OKR close + new OKR set. Strategic horizon reset.</div>
+        <div class="cg-time">2h</div>
+      </div>
+    </div>
+
+    <div class="highlight-box">
+      <strong>The quarterly review is the only place in the system where you are permitted to change your Objectives.</strong> Changing direction mid-quarter based on weekly review data is a sign of instability, not responsiveness. Resist it. Log the impulse, bring it to the quarterly.
+    </div>
+
+    <hr class="divider">
+
+    <p class="section-label">2-Hour Protocol</p>
+    <h2 class="section-title">Block by Block</h2>
+
+    <div class="timeline">
+      <div class="tl-row">
+        <div class="tl-time">0:00</div>
+        <div class="tl-line"></div>
+        <div class="tl-content">
+          <div class="tl-title">Setup & Context Loading (10 min)</div>
+          <div class="tl-body">Offline. No interruptions. Have open: last quarter's OKRs, all weekly review logs for the quarter, your project list, your long-term vision document (if you have one). Make coffee. This is a thinking session, not an admin session.</div>
+        </div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-time">0:10</div>
+        <div class="tl-line"></div>
+        <div class="tl-content">
+          <div class="tl-title">OKR Post-Mortem (30 min)</div>
+          <div class="tl-body">Score each Key Result honestly (0.0–1.0). Then go deeper: <em>why</em> did you hit or miss? The score is not the point — the causal story behind the score is. What do you now know about your constraints, capacity, and prioritization that you didn't know at the start of the quarter?</div>
+        </div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-time">0:40</div>
+        <div class="tl-line"></div>
+        <div class="tl-content">
+          <div class="tl-title">Quarter Retrospective — The Four Questions (30 min)</div>
+          <div class="tl-body">The highest-leverage 30 minutes in your system. Slow down here. These questions are designed to surface the signal beneath the noise of 13 weeks of activity.</div>
+        </div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-time">1:10</div>
+        <div class="tl-line"></div>
+        <div class="tl-content">
+          <div class="tl-title">Next Quarter OKR Design (30 min)</div>
+          <div class="tl-body">Draft new Objectives and Key Results informed by post-mortem insights. This is the creative phase. Don't anchor too heavily on last quarter's structure — allow genuine recalibration.</div>
+        </div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-time">1:40</div>
+        <div class="tl-line"></div>
+        <div class="tl-content">
+          <div class="tl-title">System Audit & Commitment (20 min)</div>
+          <div class="tl-body">Review the Personal OS itself. What friction points accumulated over the quarter? Which templates need updating? Make one concrete system improvement. Then write your quarterly commitment — a single paragraph you'll re-read at next quarter's review.</div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <p class="section-label">The Four Questions</p>
+    <h2 class="section-title">Retrospective Deep Dive</h2>
+    <p class="body-text" style="margin-bottom:24px;">These questions are ordered by depth. Spend at least 5 minutes per question. Write answers, don't just think them — writing forces precision.</p>
+
+    <div class="q-block">
+      <div class="q-num">Question 01</div>
+      <div class="q-text">What did I actually spend my time on, versus what I said I would?</div>
+      <div class="q-why">This is a reality check, not a judgment. Most people dramatically overestimate how much time they spent on their stated priorities and underestimate time spent on reactive work. The calendar data doesn't lie. Go look at it.</div>
+    </div>
+
+    <div class="q-block q-blue">
+      <div class="q-num">Question 02</div>
+      <div class="q-text">What created the most value — and was it planned or emergent?</div>
+      <div class="q-why">Some of the best outcomes of the quarter will have been unplanned. Identifying these tells you something about where your comparative advantage actually lies, which should inform next quarter's Objectives. Don't over-optimize against what you planned; optimize toward what generated real results.</div>
+    </div>
+
+    <div class="q-block q-green">
+      <div class="q-num">Question 03</div>
+      <div class="q-text">Is how I spent this quarter aligned with what I care about on a 5-year horizon?</div>
+      <div class="q-why">This is the only strategic question in the system. Everything else is operational. If the answer is no — or if you can't answer it — that's the most important signal from the quarter, and the primary input to next quarter's Objective design.</div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-num">Question 04</div>
+      <div class="q-text">What should I stop doing, start doing, and continue doing?</div>
+      <div class="q-why">The classic retrospective framework, but taken seriously at the quarterly level. "Stop" items are often harder than "start" — they require saying no to commitments that feel safe or socially expected. The quarterly review is the right forum for those decisions.</div>
+    </div>
+
+    <hr class="divider">
+
+    <p class="section-label">Next Quarter OKR Design</p>
+    <h2 class="section-title">The Design Process</h2>
+
+    <div class="matrix">
+      <div class="matrix-cell">
+        <div class="mc-quadrant">Step 1 · Horizon Check</div>
+        <div class="mc-title">Where do you want to be in 12 months?</div>
+        <div class="mc-prompt">"If I look back from a year from now, what would make this period feel like a success?" Write this before looking at last quarter's OKRs.</div>
+      </div>
+      <div class="matrix-cell">
+        <div class="mc-quadrant">Step 2 · Constraint Mapping</div>
+        <div class="mc-title">What is actually non-negotiable this quarter?</div>
+        <div class="mc-prompt">Deadlines, commitments, external obligations. Map them first — then design Objectives that are ambitious within real constraints, not despite them.</div>
+      </div>
+      <div class="matrix-cell">
+        <div class="mc-quadrant">Step 3 · Objective Draft</div>
+        <div class="mc-title">1–3 Objectives, qualitative and inspiring</div>
+        <div class="mc-prompt">Each Objective should answer: "Why would completing this matter in 5 years?" If you can't answer that, reconsider the Objective.</div>
+      </div>
+      <div class="matrix-cell">
+        <div class="mc-quadrant">Step 4 · KR Stress Test</div>
+        <div class="mc-title">Are these Key Results actually measurable?</div>
+        <div class="mc-prompt">For each KR: Can you score it 0.0 / 0.3 / 0.7 / 1.0 with clear definitions? If not, rewrite. Ambiguous KRs produce ambiguous accountability.</div>
+      </div>
+    </div>
+
+    <div class="tpl-fill">
+      <div class="tf-label">Quarterly Review Output Template</div>
+
+      <div class="tf-section">Part 1 — OKR Close</div>
+      <div class="tf-field">Quarter closed: <span class="tf-fill">[Q? YYYY]</span></div>
+      <div class="tf-field">O1 final score: <span class="tf-fill">0.__</span> · KR1: <span class="tf-fill">0.__</span> · KR2: <span class="tf-fill">0.__</span> · KR3: <span class="tf-fill">0.__</span></div>
+      <div class="tf-field">O2 final score: <span class="tf-fill">0.__</span> · KR1: <span class="tf-fill">0.__</span> · KR2: <span class="tf-fill">0.__</span></div>
+      <div class="tf-field">Avg score: <span class="tf-fill">0.__</span> <span class="tf-comment">(target was 0.6–0.7)</span></div>
+      <div class="tf-field">Post-mortem: <span class="tf-fill">[2–3 honest sentences on why scores landed where they did]</span></div>
+
+      <div class="tf-section">Part 2 — Quarter Retro</div>
+      <div class="tf-field">Time reality check: <span class="tf-fill">[actual vs. stated priorities — be specific]</span></div>
+      <div class="tf-field">Highest-value output: <span class="tf-fill">[planned / emergent — and what does this imply?]</span></div>
+      <div class="tf-field">5-year alignment: <span class="tf-fill">[yes / partial / no — and what needs to change if not?]</span></div>
+      <div class="tf-field">Stop: <span class="tf-fill">[specific commitment to drop or decline]</span></div>
+      <div class="tf-field">Start: <span class="tf-fill">[specific new practice or project to begin]</span></div>
+      <div class="tf-field">Continue: <span class="tf-fill">[what's working — protect it from dilution]</span></div>
+
+      <div class="tf-section">Part 3 — Next Quarter OKRs</div>
+      <div class="tf-field">O1: <span class="tf-fill">[Objective — qualitative, inspiring, 90-day horizon]</span></div>
+      <div class="tf-field">  KR1: <span class="tf-fill">[measurable · 0.3/0.7/1.0 scoring defined]</span></div>
+      <div class="tf-field">  KR2: <span class="tf-fill">[measurable · scoring defined]</span></div>
+      <div class="tf-field">O2: <span class="tf-fill">[Objective]</span></div>
+      <div class="tf-field">  KR1: <span class="tf-fill">[measurable]</span></div>
+      <div class="tf-field">  KR2: <span class="tf-fill">[measurable]</span></div>
+
+      <div class="tf-section">Part 4 — Quarterly Commitment</div>
+      <div class="tf-field">One paragraph: <span class="tf-fill">[Written to your future self at next quarter's review. What do you commit to? What do you hope will be true in 90 days? What trade-offs are you consciously making?]</span></div>
+      <div class="tf-comment"># Re-read this at the start of next quarter's review. Hold yourself to it.</div>
+    </div>
+
+    <hr class="divider">
+
+    <p class="section-label">Common Mistakes</p>
+    <h2 class="section-title">What Breaks Quarterly Reviews</h2>
+
+    <div class="q-block">
+      <div class="q-num">Mistake 01</div>
+      <div class="q-text">Doing the quarterly in the same headspace as weekly reviews</div>
+      <div class="q-why">Weekly reviews are operational. Quarterly reviews require a different cognitive mode — more reflective, less reactive. Change your environment. Do it on a Saturday morning, not a Friday afternoon between meetings.</div>
+    </div>
+    <div class="q-block q-blue">
+      <div class="q-num">Mistake 02</div>
+      <div class="q-text">Carrying forward last quarter's OKRs unchanged</div>
+      <div class="q-why">If nothing changed, you didn't review — you rescheduled. The quarterly is specifically designed to allow genuine recalibration. Use it.</div>
+    </div>
+    <div class="q-block q-green">
+      <div class="q-num">Mistake 03</div>
+      <div class="q-text">Treating low scores as failure rather than signal</div>
+      <div class="q-why">A 0.4 score on a genuinely ambitious KR is more valuable data than a 1.0 on an easy one. The quarterly review is diagnostic, not performative. No one is grading you — you're building a calibration model of yourself.</div>
+    </div>
+
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="side-col">
+    <div class="sidebar-box">
+      <div class="sidebar-label">On this page</div>
+      <a class="sidebar-link" href="#"><span class="sl-num">01</span> Three-Level Hierarchy</a>
+      <a class="sidebar-link" href="#"><span class="sl-num">02</span> 2-Hour Protocol</a>
+      <a class="sidebar-link" href="#"><span class="sl-num">03</span> Four Questions</a>
+      <a class="sidebar-link" href="#"><span class="sl-num">04</span> OKR Design Process</a>
+      <a class="sidebar-link" href="#"><span class="sl-num">05</span> Full Template</a>
+      <a class="sidebar-link" href="#"><span class="sl-num">06</span> Common Mistakes</a>
+    </div>
+    <div class="sidebar-box">
+      <div class="sidebar-label">Related Pages</div>
+      <a class="related-link" href="okr.html">OKR System</a>
+      <a class="related-link" href="weekly-review.html">Weekly Review</a>
+      <a class="related-link" href="index.html">← Back to Personal OS</a>
+    </div>
+    <div class="sidebar-box" style="background:var(--ink);border-color:#333;">
+      <div class="sidebar-label" style="color:#666;">Quarterly Schedule</div>
+      <div style="font-family:var(--mono);font-size:11px;color:#888;line-height:2.2;">
+        <div style="color:var(--accent);">Q1 Review</div>
+        <div style="color:#666;">Last week of March</div>
+        <br>
+        <div style="color:var(--accent);">Q2 Review</div>
+        <div style="color:#666;">Last week of June</div>
+        <br>
+        <div style="color:var(--accent);">Q3 Review</div>
+        <div style="color:#666;">Last week of Sept</div>
+        <br>
+        <div style="color:var(--accent);">Q4 Review</div>
+        <div style="color:#666;">Last week of Dec</div>
+        <br>
+        <div style="color:#555;font-size:10px;">Book all 4 now.<br>Treat as immovable.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<nav class="page-nav">
+  <a href="weekly-review.html" class="nav-link">
+    <span class="nl-label">← Prev</span>
+    <span class="nl-title">Weekly Review Protocol</span>
+  </a>
+  <a href="index.html" class="nav-link right">
+    <span class="nl-label">Back to</span>
+    <span class="nl-title">Personal OS Home</span>
+  </a>
+</nav>
+
+</body>
+</html>

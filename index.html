@@ -432,6 +432,76 @@
     margin: 40px 0;
   }
 
+  /* ── WIKI LINKS ── */
+  .wiki-link {
+    color: var(--accent2);
+    text-decoration: none;
+    border-bottom: 1px dashed var(--accent2);
+    font-weight: 600;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+  .wiki-link::after {
+    content: '↗';
+    font-size: 10px;
+    opacity: 0.6;
+    font-family: var(--mono);
+  }
+  .wiki-link:hover {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .wiki-link:hover::after { opacity: 1; }
+
+  /* ── WIKI CARD FOOTER ── */
+  .card-links {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .card-wiki-btn {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    text-decoration: none;
+    background: #e8f0f8;
+    border: 1px solid #c8d8ec;
+    border-radius: 2px;
+    padding: 4px 10px;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .card-wiki-btn::after { content: '→'; }
+  .card-wiki-btn:hover { background: var(--accent2); color: white; }
+
+  /* ── WIKI TOAST ── */
+  .wiki-toast {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 10px 16px;
+    border-radius: 2px;
+    border-left: 3px solid var(--accent2);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.3s;
+    pointer-events: none;
+    z-index: 1000;
+  }
+  .wiki-toast.show { opacity: 1; transform: translateY(0); }
+
   /* ── RESPONSIVE ── */
   @media (max-width: 768px) {
     .site-header, .tab-nav, .main { padding-left: 24px; padding-right: 24px; }
@@ -507,7 +577,12 @@
         <div class="card-accent-bar bar-gold"></div>
         <div class="card-tag">Layer 4</div>
         <h3>Capture & Review Loops</h3>
-        <p>Weekly 45-min review processes all inboxes, updates OKRs, pre-loads next week. Monthly 2hr review recalibrates quarterly direction.</p>
+        <p>Weekly 45-min review processes all inboxes, updates <a class="wiki-link" href="okr.html">OKRs</a>, <a class="wiki-link" href="weekly-review.html">pre-loads next week</a>. Monthly 2hr review <a class="wiki-link" href="quarterly-review.html">recalibrates quarterly direction</a>.</p>
+        <div class="card-links">
+          <a class="card-wiki-btn" href="okr.html">OKR System</a>
+          <a class="card-wiki-btn" href="weekly-review.html">Weekly Review</a>
+          <a class="card-wiki-btn" href="quarterly-review.html">Quarterly Review</a>
+        </div>
       </div>
     </div>
 
@@ -1076,6 +1151,8 @@ Energy management note: ___</code>
 
 </main>
 
+<div class="wiki-toast" id="wikiToast">Opening wiki page →</div>
+
 <script>
 function switchTab(id) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
@@ -1084,6 +1161,19 @@ function switchTab(id) {
   event.target.classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+// Wiki link hover preview
+document.querySelectorAll('.wiki-link, .card-wiki-btn').forEach(link => {
+  link.addEventListener('mouseenter', () => {
+    const toast = document.getElementById('wikiToast');
+    const dest = link.textContent.replace('→','').trim();
+    toast.textContent = 'Open wiki: ' + dest + ' →';
+    toast.classList.add('show');
+  });
+  link.addEventListener('mouseleave', () => {
+    document.getElementById('wikiToast').classList.remove('show');
+  });
+});
 </script>
 </body>
 </html>

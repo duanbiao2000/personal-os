@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weekly Review — Personal OS Wiki</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f0e0c; --paper: #f5f2eb; --cream: #ede9df;
+    --accent: #c8401a; --accent2: #2d5a8e; --muted: #7a7468;
+    --border: #d4cfc4; --highlight: #f0e8c8; --green: #2a6649;
+    --mono: 'JetBrains Mono', monospace;
+    --serif: 'Instrument Serif', serif;
+    --sans: 'Syne', sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.6; }
+
+  .breadcrumb { background: var(--ink); padding: 14px 64px; display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; }
+  .breadcrumb a { color: #888; text-decoration: none; transition: color 0.2s; }
+  .breadcrumb a:hover { color: var(--accent); }
+  .breadcrumb .sep { color: #444; }
+  .breadcrumb .current { color: var(--paper); }
+
+  .page-header { background: var(--ink); color: var(--paper); padding: 48px 64px 44px; border-top: 1px solid #222; position: relative; overflow: hidden; }
+  .page-header::before { content: ''; position: absolute; top: -60px; right: -60px; width: 280px; height: 280px; border-radius: 50%; background: var(--accent2); opacity: 0.1; }
+  .wiki-tag { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: #9bb8d4; margin-bottom: 12px; }
+  .page-title { font-family: var(--serif); font-size: clamp(32px, 4vw, 56px); line-height: 1.1; font-weight: 400; margin-bottom: 12px; }
+  .page-title em { font-style: italic; color: #c8b898; }
+  .page-subtitle { font-family: var(--mono); font-size: 12px; color: #888; max-width: 560px; }
+
+  .page-body { display: grid; grid-template-columns: 1fr 280px; gap: 48px; max-width: 1100px; margin: 0 auto; padding: 48px 64px; }
+
+  .sidebar-box { background: white; border: 1px solid var(--border); border-radius: 2px; padding: 20px; margin-bottom: 20px; position: sticky; top: 20px; }
+  .sidebar-label { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--muted); margin-bottom: 12px; }
+  .sidebar-link { display: block; font-size: 13px; color: var(--ink); text-decoration: none; padding: 6px 0; border-bottom: 1px dashed var(--border); transition: color 0.2s; }
+  .sidebar-link:last-child { border-bottom: none; }
+  .sidebar-link:hover { color: var(--accent); }
+  .sidebar-link .sl-num { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-right: 8px; }
+  .related-link { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--accent2); text-decoration: none; padding: 8px 0; border-bottom: 1px dashed var(--border); transition: color 0.2s; }
+  .related-link:last-child { border-bottom: none; }
+  .related-link:hover { color: var(--accent); }
+  .related-link::before { content: '→'; font-family: var(--mono); font-size: 11px; }
+
+  .section-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; margin-top: 48px; }
+  .section-label:first-child { margin-top: 0; }
+  .section-title { font-family: var(--serif); font-size: 28px; font-weight: 400; margin-bottom: 16px; }
+  p.body-text { font-size: 14px; color: #444; line-height: 1.8; margin-bottom: 16px; }
+  .highlight-box { background: var(--highlight); border: 1px solid #d4c070; border-radius: 2px; padding: 18px 22px; margin: 20px 0; font-size: 13px; line-height: 1.7; }
+  hr.divider { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+
+  /* PHASE BLOCKS */
+  .phase {
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    margin-bottom: 20px;
+    background: white;
+    overflow: hidden;
+  }
+  .phase-header {
+    display: grid;
+    grid-template-columns: 64px 1fr auto;
+    align-items: center;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+  }
+  .phase-num {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--serif);
+    font-size: 22px;
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    align-self: stretch;
+  }
+  .phase-info { padding: 16px 20px; }
+  .phase-title { font-weight: 600; font-size: 15px; margin-bottom: 3px; }
+  .phase-meta { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .phase-time {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent);
+    padding: 0 20px;
+    white-space: nowrap;
+  }
+  .phase-body { padding: 20px 24px; }
+  .phase-body p { font-size: 13px; color: #444; line-height: 1.7; margin-bottom: 12px; }
+  .phase-body p:last-child { margin-bottom: 0; }
+
+  /* TEMPLATE FILL */
+  .tpl-fill {
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 2px;
+    padding: 20px 24px;
+    margin-top: 12px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 2;
+  }
+  .tpl-fill .tf-label { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+  .tpl-fill .tf-field { color: #aaa; }
+  .tpl-fill .tf-fill { color: #c8b898; }
+  .tpl-fill .tf-comment { color: #444; font-size: 11px; }
+
+  /* TIME VISUAL */
+  .time-bar {
+    display: flex;
+    height: 48px;
+    border-radius: 2px;
+    overflow: hidden;
+    margin: 20px 0;
+    border: 1px solid var(--border);
+  }
+  .time-segment {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    text-align: center;
+    line-height: 1.3;
+    padding: 0 4px;
+  }
+  .ts-1 { background: #1a2a3a; color: #9bb8d4; flex: 1; }
+  .ts-2 { background: #2a1a1a; color: #d4a0a0; flex: 1.5; }
+  .ts-3 { background: #1a3a1a; color: #9dc49d; flex: 1.5; }
+  .ts-4 { background: #2a2a1a; color: #d4c880; flex: 1; }
+  .ts-5 { background: #2a1a2a; color: #c0a0d4; flex: 1; }
+  .ts-label { font-size: 9px; display: block; }
+
+  /* CHECKLIST */
+  .checklist { list-style: none; margin: 16px 0; }
+  .checklist li {
+    display: flex;
+    gap: 10px;
+    font-size: 13px;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--border);
+    align-items: flex-start;
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .check-box {
+    width: 16px; height: 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 2px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    background: white;
+  }
+  .checklist li .check-text { line-height: 1.6; color: #444; }
+  .checklist li .check-note { font-family: var(--mono); font-size: 10px; color: var(--muted); display: block; margin-top: 2px; }
+
+  /* INSIGHT BOX */
+  .insight-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin: 20px 0;
+  }
+  .insight-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 18px;
+  }
+  .insight-card .ic-label { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 8px; }
+  .insight-card .ic-body { font-size: 13px; color: #444; line-height: 1.6; }
+
+  .page-nav { background: var(--cream); border-top: 1px solid var(--border); padding: 24px 64px; display: flex; justify-content: space-between; align-items: center; }
+  .nav-link { display: flex; flex-direction: column; text-decoration: none; color: var(--ink); transition: color 0.2s; }
+  .nav-link:hover { color: var(--accent); }
+  .nav-link .nl-label { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 4px; }
+  .nav-link .nl-title { font-size: 14px; font-weight: 600; }
+  .nav-link.right { text-align: right; }
+
+  @media (max-width: 768px) {
+    .breadcrumb, .page-header, .page-nav { padding-left: 24px; padding-right: 24px; }
+    .page-body { grid-template-columns: 1fr; padding: 24px; }
+    .side-col { display: none; }
+    .insight-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="breadcrumb">
+  <a href="index.html">Personal OS</a>
+  <span class="sep">/</span>
+  <a href="index.html#tab-review">Weekly Review</a>
+  <span class="sep">/</span>
+  <span class="current">Full Protocol</span>
+</div>
+
+<header class="page-header">
+  <div class="wiki-tag">Wiki · Weekly Cadence</div>
+  <h1 class="page-title">The <em>Weekly Review</em></h1>
+  <p class="page-subtitle">45 minutes every Friday. The single ritual that prevents drift, closes loops, and pre-loads the next week.</p>
+</header>
+
+<div class="page-body">
+  <div class="main-col">
+
+    <p class="section-label">Why This Ritual Is Non-Negotiable</p>
+    <h2 class="section-title">The Compounding Return on Review</h2>
+
+    <p class="body-text">Most productivity loss doesn't happen in execution — it happens in the gaps between weeks, when open loops accumulate, priorities silently shift, and the connection between daily work and long-term goals erodes. The weekly review is the antidote: it processes accumulated noise, realigns compass bearing, and converts the coming week from reactive to intentional.</p>
+
+    <p class="body-text">At PhD level and above, the review has an additional function: it maintains the <em>research narrative</em>. Progress on long-horizon projects is not visible day-to-day. The weekly review is the granularity at which direction and momentum become legible.</p>
+
+    <div class="highlight-box">
+      <strong>Compounding effect:</strong> A researcher who does 48 weekly reviews per year has 48 course corrections. One who skips them drifts for weeks before noticing. Over a 5-year PhD, this difference compounds into months of effective work time.
+    </div>
+
+    <hr class="divider">
+
+    <p class="section-label">Time Budget</p>
+    <h2 class="section-title">45 Minutes, Five Phases</h2>
+
+    <div class="time-bar">
+      <div class="time-segment ts-1"><span class="ts-label">CAPTURE<br>CLEAR</span><br>5m</div>
+      <div class="time-segment ts-2"><span class="ts-label">WEEK<br>RETRO</span><br>10m</div>
+      <div class="time-segment ts-3"><span class="ts-label">PROJECT<br>SWEEP</span><br>10m</div>
+      <div class="time-segment ts-4"><span class="ts-label">OKR<br>CHECK</span><br>5m</div>
+      <div class="time-segment ts-5"><span class="ts-label">NEXT WEEK<br>PRELOAD</span><br>15m</div>
+    </div>
+
+    <hr class="divider">
+
+    <p class="section-label">Phase-by-Phase</p>
+    <h2 class="section-title">The Full Protocol</h2>
+
+    <!-- Phase 1 -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-num">1</div>
+        <div class="phase-info">
+          <div class="phase-title">Capture Clear</div>
+          <div class="phase-meta">Process all open inboxes to zero</div>
+        </div>
+        <div class="phase-time">5 min</div>
+      </div>
+      <div class="phase-body">
+        <p>Before you can review the week, you must clear the accumulated inputs. This phase is mechanical: move everything from capture points into your system or delete it. Do not get distracted reading deeply — just triage.</p>
+        <ul class="checklist">
+          <li><div class="check-box"></div><div><span class="check-text">Physical inbox / notebook pages</span><span class="check-note">→ transcribe any actionable items into your task system</span></div></li>
+          <li><div class="check-box"></div><div><span class="check-text">Email inbox → zero</span><span class="check-note">→ archive, respond (if &lt;2min), or create task. Not both.</span></div></li>
+          <li><div class="check-box"></div><div><span class="check-text">Slack / messaging DMs</span><span class="check-note">→ clear or snooze. Don't leave open loops.</span></div></li>
+          <li><div class="check-box"></div><div><span class="check-text">Browser tabs (open = open loop)</span><span class="check-note">→ save to read-later app or close. Not both.</span></div></li>
+          <li><div class="check-box"></div><div><span class="check-text">Desktop / Downloads folder</span><span class="check-note">→ file or delete. Zero loose files.</span></div></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Phase 2 -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-num">2</div>
+        <div class="phase-info">
+          <div class="phase-title">Week Retrospective</div>
+          <div class="phase-meta">What actually happened vs. what was planned</div>
+        </div>
+        <div class="phase-time">10 min</div>
+      </div>
+      <div class="phase-body">
+        <p>Read back through the week's daily logs — specifically the WIN / ADJUST / TOMORROW lines from each shutdown. Do not reconstruct from memory. Memory is biased toward recency and drama. The logs are the data.</p>
+        <p>Then calculate your MIT completion rate for the week. This number is the primary signal of system health. Track it over time.</p>
+        <div class="tpl-fill">
+          <div class="tf-label">Week Retro Template</div>
+          <div class="tf-field">Week: <span class="tf-fill">[YYYY-WW]</span></div>
+          <div class="tf-field">MITs planned: <span class="tf-fill">___</span> · completed: <span class="tf-fill">___</span> · rate: <span class="tf-fill">___%</span></div>
+          <br>
+          <div class="tf-field">Biggest output this week: <span class="tf-fill">[concrete deliverable]</span></div>
+          <div class="tf-field">Biggest miss: <span class="tf-fill">[what didn't happen, be specific]</span></div>
+          <div class="tf-field">Root cause of miss: <span class="tf-fill">[overcommitment / distraction / unclear scope / external block]</span></div>
+          <br>
+          <div class="tf-field">Energy pattern: <span class="tf-fill">[Mon–Fri 1–5, e.g. 4/3/5/4/3]</span></div>
+          <div class="tf-field">Pattern I notice: <span class="tf-fill">[one honest observation]</span></div>
+          <div class="tf-comment"># If MIT rate &lt; 50% two weeks running → system recalibration needed</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 3 -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-num">3</div>
+        <div class="phase-info">
+          <div class="phase-title">Project Status Sweep</div>
+          <div class="phase-meta">Every active project gets a 60-second status update</div>
+        </div>
+        <div class="phase-time">10 min</div>
+      </div>
+      <div class="phase-body">
+        <p>Open your project list (should be ≤ 10 active projects at any time). For each project: update status, check if on track vs. original milestone dates. The goal is not detailed planning — it's early warning detection.</p>
+        <div class="insight-row">
+          <div class="insight-card">
+            <div class="ic-label">🟢 On Track</div>
+            <div class="ic-body">Progress this week visible. Milestone dates intact. Next action clear. No action needed in review — just log status.</div>
+          </div>
+          <div class="insight-card">
+            <div class="ic-label">🟡 At Risk</div>
+            <div class="ic-body">Progress slower than planned, or external dependency uncertain. Flag for Monday planning — needs dedicated time or explicit decision to descope.</div>
+          </div>
+          <div class="insight-card">
+            <div class="ic-label">🔴 Behind</div>
+            <div class="ic-body">Milestone already missed or clearly unreachable. Must either: reset milestone with honest date, reduce scope, or officially pause project. Don't let it linger.</div>
+          </div>
+          <div class="insight-card">
+            <div class="ic-label">⬜ Stalled (&gt;3 weeks)</div>
+            <div class="ic-body">No progress for 3+ consecutive weeks. Decision required: archive, delegate, or restart with new constraints. Stalled projects are cognitive debt.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 4 -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-num">4</div>
+        <div class="phase-info">
+          <div class="phase-title">OKR Check</div>
+          <div class="phase-meta">Update quarterly score estimates, check alignment</div>
+        </div>
+        <div class="phase-time">5 min</div>
+      </div>
+      <div class="phase-body">
+        <p>For each Key Result, update your current score estimate (0.0–1.0). Then ask the single most important alignment question.</p>
+        <div class="tpl-fill">
+          <div class="tf-label">OKR Weekly Check</div>
+          <div class="tf-field">Quarter: <span class="tf-fill">[Q3 2025]</span> · Week: <span class="tf-fill">[8 of 13]</span></div>
+          <br>
+          <div class="tf-field">O1: <span class="tf-fill">[Objective text]</span></div>
+          <div class="tf-field">  KR1: <span class="tf-fill">0.__ → 0.__</span> <span class="tf-comment">(was / now)</span></div>
+          <div class="tf-field">  KR2: <span class="tf-fill">0.__ → 0.__</span></div>
+          <br>
+          <div class="tf-field">Alignment check: <span class="tf-fill">[Did this week's DW blocks move at least one KR? Y/N]</span></div>
+          <div class="tf-field">If N → next week DW1 assigned to: <span class="tf-fill">[specific KR]</span></div>
+          <div class="tf-comment"># Projected end-of-quarter score based on current trajectory?</div>
+          <div class="tf-comment"># If projected &lt; 0.4 → escalate to monthly review agenda</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 5 -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-num">5</div>
+        <div class="phase-info">
+          <div class="phase-title">Next Week Pre-Load</div>
+          <div class="phase-meta">Design next week while this week is still in memory</div>
+        </div>
+        <div class="phase-time">15 min</div>
+      </div>
+      <div class="phase-body">
+        <p>This phase has the highest leverage. Pre-loading next week on Friday means Monday begins with clarity instead of planning overhead. The decision is made when your context is richest — right after reviewing the week.</p>
+        <ul class="checklist">
+          <li><div class="check-box"></div><div><span class="check-text">Open Monday Planning template, fill in Week's Single Most Important Outcome</span><span class="check-note">→ one sentence. If you do nothing else next week, do this.</span></div></li>
+          <li><div class="check-box"></div><div><span class="check-text">Pre-schedule both Deep Work blocks in calendar for Mon and Tue</span><span class="check-note">→ assign specific projects to each block before Monday arrives</span></div></li>
+          <li><div class="check-box"></div><div><span class="check-text">Review all meetings already on next week's calendar</span><span class="check-note">→ cancel or shorten anything that doesn't require your presence</span></div></li>
+          <li><div class="check-box"></div><div><span class="check-text">Identify the single highest-leverage task for each active project</span><span class="check-note">→ these become the candidate MIT pool for the week</span></div></li>
+          <li><div class="check-box"></div><div><span class="check-text">Pre-commit one "avoid" — a specific distraction or low-value activity to decline</span><span class="check-note">→ pre-commitment decisions cost less willpower than in-the-moment ones</span></div></li>
+        </ul>
+        <div class="tpl-fill" style="margin-top:16px;">
+          <div class="tf-label">Next Week Pre-Load Output</div>
+          <div class="tf-field">Week's single outcome: <span class="tf-fill">[fill here on Friday]</span></div>
+          <div class="tf-field">DW1 Mon assigned to: <span class="tf-fill">[project + specific task]</span></div>
+          <div class="tf-field">DW1 Tue assigned to: <span class="tf-fill">[project + specific task]</span></div>
+          <div class="tf-field">Must avoid: <span class="tf-fill">[specific]</span></div>
+          <div class="tf-field">Open risk: <span class="tf-fill">[one thing that could derail the week]</span></div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <p class="section-label">System Health Indicators</p>
+    <h2 class="section-title">Interpreting Your Review Data</h2>
+    <p class="body-text">Track these numbers over 4+ weeks to diagnose system health:</p>
+
+    <div class="insight-row">
+      <div class="insight-card">
+        <div class="ic-label">MIT Rate &gt; 80%</div>
+        <div class="ic-body">System working well. Consider increasing ambition of MITs.</div>
+      </div>
+      <div class="insight-card">
+        <div class="ic-label">MIT Rate 50–80%</div>
+        <div class="ic-body">Normal operating range. Identify single biggest category of misses and address.</div>
+      </div>
+      <div class="insight-card">
+        <div class="ic-label">MIT Rate &lt; 50%</div>
+        <div class="ic-body">System signal: MITs too ambitious, scheduling broken, or external load too high. Reduce before restoring.</div>
+      </div>
+      <div class="insight-card">
+        <div class="ic-label">0 DW sessions/week</div>
+        <div class="ic-body">Critical failure mode. Deep work is the only mechanism of progress on hard problems. Everything else is maintenance.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="side-col">
+    <div class="sidebar-box">
+      <div class="sidebar-label">On this page</div>
+      <a class="sidebar-link" href="#"><span class="sl-num">01</span> Why This Ritual</a>
+      <a class="sidebar-link" href="#"><span class="sl-num">02</span> Time Budget</a>
+      <a class="sidebar-link" href="#"><span class="sl-num">03</span> Phase 1: Capture</a>
+      <a class="sidebar-link" href="#"><span class="sl-num">04</span> Phase 2: Retro</a>
+      <a class="sidebar-link" href="#"><span class="sl-num">05</span> Phase 3: Projects</a>
+      <a class="sidebar-link" href="#"><span class="sl-num">06</span> Phase 4: OKR Check</a>
+      <a class="sidebar-link" href="#"><span class="sl-num">07</span> Phase 5: Pre-Load</a>
+      <a class="sidebar-link" href="#"><span class="sl-num">08</span> Health Indicators</a>
+    </div>
+    <div class="sidebar-box">
+      <div class="sidebar-label">Related Pages</div>
+      <a class="related-link" href="okr.html">OKR System</a>
+      <a class="related-link" href="quarterly-review.html">Quarterly Review</a>
+      <a class="related-link" href="index.html">← Back to Personal OS</a>
+    </div>
+    <div class="sidebar-box" style="background:var(--ink);border-color:#333;">
+      <div class="sidebar-label" style="color:#666;">Time Breakdown</div>
+      <div style="font-family:var(--mono);font-size:11px;color:#888;line-height:2.2;">
+        <div style="display:flex;justify-content:space-between;"><span>Capture Clear</span><span style="color:var(--accent);">5m</span></div>
+        <div style="display:flex;justify-content:space-between;"><span>Week Retro</span><span style="color:var(--accent);">10m</span></div>
+        <div style="display:flex;justify-content:space-between;"><span>Project Sweep</span><span style="color:var(--accent);">10m</span></div>
+        <div style="display:flex;justify-content:space-between;"><span>OKR Check</span><span style="color:var(--accent);">5m</span></div>
+        <div style="display:flex;justify-content:space-between;"><span>Next Week</span><span style="color:var(--accent);">15m</span></div>
+        <div style="display:flex;justify-content:space-between;border-top:1px solid #333;padding-top:6px;margin-top:4px;"><span style="color:#eee;">Total</span><span style="color:#eee;">45m</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<nav class="page-nav">
+  <a href="okr.html" class="nav-link">
+    <span class="nl-label">← Prev</span>
+    <span class="nl-title">OKR System</span>
+  </a>
+  <a href="quarterly-review.html" class="nav-link right">
+    <span class="nl-label">Next →</span>
+    <span class="nl-title">Quarterly Review</span>
+  </a>
+</nav>
+
+</body>
+</html>

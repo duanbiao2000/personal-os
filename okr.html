@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OKR System — Personal OS Wiki</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f0e0c;
+    --paper: #f5f2eb;
+    --cream: #ede9df;
+    --accent: #c8401a;
+    --accent2: #2d5a8e;
+    --muted: #7a7468;
+    --border: #d4cfc4;
+    --highlight: #f0e8c8;
+    --green: #2a6649;
+    --mono: 'JetBrains Mono', monospace;
+    --serif: 'Instrument Serif', serif;
+    --sans: 'Syne', sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.6; }
+
+  /* BREADCRUMB */
+  .breadcrumb {
+    background: var(--ink);
+    padding: 14px 64px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+  }
+  .breadcrumb a { color: #888; text-decoration: none; transition: color 0.2s; }
+  .breadcrumb a:hover { color: var(--accent); }
+  .breadcrumb .sep { color: #444; }
+  .breadcrumb .current { color: var(--paper); }
+
+  /* HEADER */
+  .page-header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 48px 64px 44px;
+    border-top: 1px solid #222;
+    position: relative;
+    overflow: hidden;
+  }
+  .page-header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 280px; height: 280px;
+    border-radius: 50%;
+    background: #b8960c;
+    opacity: 0.1;
+  }
+  .wiki-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #b8960c;
+    margin-bottom: 12px;
+  }
+  .page-title {
+    font-family: var(--serif);
+    font-size: clamp(32px, 4vw, 56px);
+    line-height: 1.1;
+    font-weight: 400;
+    margin-bottom: 12px;
+  }
+  .page-title em { font-style: italic; color: #c8b898; }
+  .page-subtitle {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: #888;
+    max-width: 560px;
+  }
+
+  /* LAYOUT */
+  .page-body {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 48px;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 48px 64px;
+  }
+  .main-col {}
+  .side-col {}
+
+  /* SIDEBAR */
+  .sidebar-box {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 20px;
+    margin-bottom: 20px;
+    position: sticky;
+    top: 20px;
+  }
+  .sidebar-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .sidebar-link {
+    display: block;
+    font-size: 13px;
+    color: var(--ink);
+    text-decoration: none;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--border);
+    transition: color 0.2s;
+  }
+  .sidebar-link:last-child { border-bottom: none; }
+  .sidebar-link:hover { color: var(--accent); }
+  .sidebar-link .sl-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    margin-right: 8px;
+  }
+  .related-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--accent2);
+    text-decoration: none;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--border);
+    transition: color 0.2s;
+  }
+  .related-link:last-child { border-bottom: none; }
+  .related-link:hover { color: var(--accent); }
+  .related-link::before { content: '→'; font-family: var(--mono); font-size: 11px; }
+
+  /* SECTION ELEMENTS */
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+    margin-top: 48px;
+  }
+  .section-label:first-child { margin-top: 0; }
+  .section-title {
+    font-family: var(--serif);
+    font-size: 28px;
+    font-weight: 400;
+    margin-bottom: 16px;
+  }
+  p.body-text { font-size: 14px; color: #444; line-height: 1.8; margin-bottom: 16px; }
+
+  /* HIGHLIGHT */
+  .highlight-box {
+    background: var(--highlight);
+    border: 1px solid #d4c070;
+    border-radius: 2px;
+    padding: 18px 22px;
+    margin: 20px 0;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+
+  /* OKR CARDS */
+  .okr-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  .okr-header {
+    padding: 18px 24px;
+    background: var(--ink);
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .okr-o-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    background: var(--accent);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .okr-objective {
+    font-family: var(--serif);
+    font-size: 17px;
+    font-style: italic;
+    color: #c8b898;
+    line-height: 1.4;
+  }
+  .okr-body { padding: 20px 24px; }
+  .kr-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px dashed var(--border);
+  }
+  .kr-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .kr-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent2);
+    background: #e8f0f8;
+    border: 1px solid #c8d8ec;
+    padding: 2px 7px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    height: fit-content;
+    margin-top: 2px;
+  }
+  .kr-content {}
+  .kr-text { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .kr-detail { font-size: 12px; color: #666; line-height: 1.6; }
+  .kr-progress {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 4px;
+    background: var(--cream);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent2);
+    border-radius: 2px;
+    transition: width 0.5s;
+  }
+  .progress-pct {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    min-width: 30px;
+  }
+
+  /* FORMULA BOX */
+  .formula-box {
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 2px;
+    padding: 24px 28px;
+    margin: 20px 0;
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+  .formula-box .f-label {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .formula-box .f-line { color: #ccc; line-height: 2; }
+  .formula-box .f-line .f-var { color: #9bb8d4; }
+  .formula-box .f-line .f-val { color: #c8d8a0; }
+  .formula-box .f-comment { color: #555; font-size: 11px; }
+
+  /* TABLE */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 13px;
+  }
+  .data-table th {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    background: var(--cream);
+    padding: 10px 14px;
+    text-align: left;
+    border: 1px solid var(--border);
+  }
+  .data-table td {
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.6;
+    background: white;
+  }
+  .data-table tr:hover td { background: #fafaf7; }
+  .tag-good { background: #e8f5e8; color: #2a6649; border-radius: 2px; padding: 2px 7px; font-family: var(--mono); font-size: 10px; }
+  .tag-bad { background: #fde8e8; color: #8b2020; border-radius: 2px; padding: 2px 7px; font-family: var(--mono); font-size: 10px; }
+
+  /* DIVIDER */
+  hr.divider { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+
+  /* BOTTOM NAV */
+  .page-nav {
+    background: var(--cream);
+    border-top: 1px solid var(--border);
+    padding: 24px 64px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0;
+  }
+  .nav-link {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: var(--ink);
+    transition: color 0.2s;
+  }
+  .nav-link:hover { color: var(--accent); }
+  .nav-link .nl-label { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 4px; }
+  .nav-link .nl-title { font-size: 14px; font-weight: 600; }
+  .nav-link.right { text-align: right; }
+
+  @media (max-width: 768px) {
+    .breadcrumb, .page-header, .page-nav { padding-left: 24px; padding-right: 24px; }
+    .page-body { grid-template-columns: 1fr; padding: 24px; }
+    .side-col { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="breadcrumb">
+  <a href="index.html">Personal OS</a>
+  <span class="sep">/</span>
+  <a href="index.html#tab-overview">Capture & Review Loops</a>
+  <span class="sep">/</span>
+  <span class="current">OKR System</span>
+</div>
+
+<header class="page-header">
+  <div class="wiki-tag">Wiki · Quarterly Planning</div>
+  <h1 class="page-title">The <em>OKR System</em></h1>
+  <p class="page-subtitle">Objectives & Key Results — a forcing function for honest prioritization across 90-day cycles.</p>
+</header>
+
+<div class="page-body">
+  <div class="main-col">
+
+    <p class="section-label">What & Why</p>
+    <h2 class="section-title">OKRs Are Not a To-Do List</h2>
+
+    <p class="body-text">OKRs (Objectives & Key Results) were developed at Intel by Andy Grove and popularized at Google. The core insight: most people confuse <em>activity</em> with <em>progress</em>. OKRs force a separation between what you want to achieve (Objective) and how you will measure achievement (Key Results).</p>
+
+    <p class="body-text">At the personal level, OKRs solve a different problem than corporate OKRs. You're not trying to align a team — you're trying to prevent yourself from drifting. A 90-day OKR cycle is the minimum unit of time in which meaningful skill development or project progress is visible. Shorter cycles optimize for activity; longer cycles lose feedback resolution.</p>
+
+    <div class="highlight-box">
+      <strong>The fundamental test:</strong> If your OKR score at the end of 90 days is always 1.0 (everything achieved), your Key Results are too easy. If it's always below 0.4, your Objectives are disconnected from your actual constraints. The target zone is <strong>0.6–0.7</strong> — ambitious but achievable with focused effort.
+    </div>
+
+    <hr class="divider">
+
+    <p class="section-label">Architecture</p>
+    <h2 class="section-title">Structure of a Personal OKR</h2>
+
+    <div class="formula-box">
+      <div class="f-label">OKR Anatomy</div>
+      <div class="f-line"><span class="f-var">Objective</span>  = qualitative · inspiring · directional · time-bound to quarter</div>
+      <div class="f-line"><span class="f-var">Key Result</span> = quantitative · binary or measurable · 2–4 per Objective</div>
+      <div class="f-line"><span class="f-var">Score</span>      = <span class="f-val">0.0</span> (not started) → <span class="f-val">1.0</span> (fully achieved)</div>
+      <div class="f-line"><span class="f-var">Target</span>     = <span class="f-val">0.6–0.7</span> at quarter end (stretch, not guarantee)</div>
+      <br>
+      <div class="f-comment"># Personal limit: 1–3 Objectives per quarter. More = none done well.</div>
+      <div class="f-comment"># Total Key Results: 3–8 across all Objectives. Keep it on one page.</div>
+    </div>
+
+    <p class="section-label">Real Examples</p>
+    <h2 class="section-title">PhD-Level OKR Samples</h2>
+    <p class="body-text" style="margin-bottom:24px;">Three archetypes: Research, Career, and Personal Development. Each shows the O+KR structure with scoring guidance.</p>
+
+    <!-- OKR 1: Research -->
+    <div class="okr-card">
+      <div class="okr-header">
+        <div class="okr-o-badge">O1</div>
+        <div class="okr-objective">Advance my dissertation to a defensible first draft by end of Q3</div>
+      </div>
+      <div class="okr-body">
+        <div class="kr-row">
+          <div class="kr-badge">KR1</div>
+          <div class="kr-content">
+            <div class="kr-text">Complete chapters 2 and 3 (methodology + results), minimum 12,000 words combined</div>
+            <div class="kr-detail">Scoring: 0.3 = one chapter drafted · 0.7 = both drafted, unpolished · 1.0 = both with advisor feedback incorporated</div>
+            <div class="kr-progress">
+              <div class="progress-bar"><div class="progress-fill" style="width:70%"></div></div>
+              <span class="progress-pct">0.7</span>
+            </div>
+          </div>
+        </div>
+        <div class="kr-row">
+          <div class="kr-badge">KR2</div>
+          <div class="kr-content">
+            <div class="kr-text">Run all planned experiments and achieve p &lt; 0.05 on primary hypothesis, or document why null result is publishable</div>
+            <div class="kr-detail">Scoring: 0.4 = experiments complete, no result yet · 0.7 = result achieved · 1.0 = result + robustness checks done</div>
+            <div class="kr-progress">
+              <div class="progress-bar"><div class="progress-fill" style="width:40%"></div></div>
+              <span class="progress-pct">0.4</span>
+            </div>
+          </div>
+        </div>
+        <div class="kr-row">
+          <div class="kr-badge">KR3</div>
+          <div class="kr-content">
+            <div class="kr-text">Present work-in-progress at one internal lab meeting and one external venue (conference or seminar)</div>
+            <div class="kr-detail">Scoring: 0.5 = internal only · 1.0 = both done</div>
+            <div class="kr-progress">
+              <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
+              <span class="progress-pct">0.5</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OKR 2: Career -->
+    <div class="okr-card">
+      <div class="okr-header">
+        <div class="okr-o-badge">O2</div>
+        <div class="okr-objective">Build a credible external research profile in my sub-field</div>
+      </div>
+      <div class="okr-body">
+        <div class="kr-row">
+          <div class="kr-badge">KR1</div>
+          <div class="kr-content">
+            <div class="kr-text">Submit one first-author paper to a top-3 venue in the field</div>
+            <div class="kr-detail">Scoring: 0.4 = draft complete · 0.7 = submitted · 1.0 = submitted + desk review passed</div>
+            <div class="kr-progress">
+              <div class="progress-bar"><div class="progress-fill" style="width:40%"></div></div>
+              <span class="progress-pct">0.4</span>
+            </div>
+          </div>
+        </div>
+        <div class="kr-row">
+          <div class="kr-badge">KR2</div>
+          <div class="kr-content">
+            <div class="kr-text">Have 3 substantive conversations with researchers outside my institution who work on adjacent problems</div>
+            <div class="kr-detail">Definition of substantive: 30+ min, led to shared notes or follow-up. Not networking small talk.</div>
+            <div class="kr-progress">
+              <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+              <span class="progress-pct">1.0</span>
+            </div>
+          </div>
+        </div>
+        <div class="kr-row">
+          <div class="kr-badge">KR3</div>
+          <div class="kr-content">
+            <div class="kr-text">Publish 4 technical posts (blog, Substack, or equivalent) synthesizing my research for a broader audience</div>
+            <div class="kr-detail">Scoring: 0.25 per post published. Forces communication skill development alongside research.</div>
+            <div class="kr-progress">
+              <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
+              <span class="progress-pct">0.5</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OKR 3: Personal -->
+    <div class="okr-card">
+      <div class="okr-header">
+        <div class="okr-o-badge">O3</div>
+        <div class="okr-objective">Maintain cognitive and physical performance through a high-output quarter</div>
+      </div>
+      <div class="okr-body">
+        <div class="kr-row">
+          <div class="kr-badge">KR1</div>
+          <div class="kr-content">
+            <div class="kr-text">Average 7+ hours sleep for ≥ 10 out of 13 weeks (tracked via Oura/phone)</div>
+            <div class="kr-detail">Research basis: sleep below 6h reduces cognitive performance to match legal intoxication. This is not optional.</div>
+            <div class="kr-progress">
+              <div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div>
+              <span class="progress-pct">0.6</span>
+            </div>
+          </div>
+        </div>
+        <div class="kr-row">
+          <div class="kr-badge">KR2</div>
+          <div class="kr-content">
+            <div class="kr-text">Complete 3 workouts per week for ≥ 10 of 13 weeks</div>
+            <div class="kr-detail">Scoring: count weeks at target / 13. Not about peak fitness — about baseline maintenance during crunch periods.</div>
+            <div class="kr-progress">
+              <div class="progress-bar"><div class="progress-fill" style="width:77%"></div></div>
+              <span class="progress-pct">0.77</span>
+            </div>
+          </div>
+        </div>
+        <div class="kr-row">
+          <div class="kr-badge">KR3</div>
+          <div class="kr-content">
+            <div class="kr-text">Zero weeks with more than 55 working hours (tracked)</div>
+            <div class="kr-detail">Scoring: (weeks compliant / 13). Overwork is a leading indicator of output decline, not a badge of commitment.</div>
+            <div class="kr-progress">
+              <div class="progress-bar"><div class="progress-fill" style="width:85%"></div></div>
+              <span class="progress-pct">0.85</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <p class="section-label">Common Failure Modes</p>
+    <h2 class="section-title">What Breaks OKR Systems</h2>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Failure Mode</th>
+          <th>Example</th>
+          <th>Fix</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Activity KRs</strong></td>
+          <td>"Work on dissertation 4h/day" <span class="tag-bad">bad</span></td>
+          <td>KRs measure outputs, not inputs. "Draft 2,000 words/week" measures output. <span class="tag-good">good</span></td>
+        </tr>
+        <tr>
+          <td><strong>Too many OKRs</strong></td>
+          <td>7 Objectives, 21 KRs for one quarter</td>
+          <td>Hard limit: 3 Objectives, 8 KRs total. If it doesn't fit, it's not a priority.</td>
+        </tr>
+        <tr>
+          <td><strong>Binary KRs</strong></td>
+          <td>"Submit paper" (done or not)</td>
+          <td>Add partial scores: 0.3/0.7/1.0 milestones. Binary KRs give no signal until the last week.</td>
+        </tr>
+        <tr>
+          <td><strong>No weekly check-in</strong></td>
+          <td>Set OKRs in January, review in March</td>
+          <td>OKRs must be reviewed weekly (5 min) to function as a navigation system, not a report card.</td>
+        </tr>
+        <tr>
+          <td><strong>Sandbagging</strong></td>
+          <td>Consistent 1.0 scores every quarter</td>
+          <td>If you hit 1.0 twice in a row, increase ambition by ~30% next quarter.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <hr class="divider">
+
+    <p class="section-label">Weekly Integration</p>
+    <h2 class="section-title">How OKRs Connect to Weekly Review</h2>
+    <p class="body-text">During the Friday Weekly Review, the OKR check takes 5 minutes:</p>
+
+    <div class="formula-box">
+      <div class="f-label">Weekly OKR Check (5 min, every Friday)</div>
+      <div class="f-line"><span class="f-comment"># For each Key Result, update score estimate</span></div>
+      <div class="f-line"><span class="f-var">KR score</span> = current progress / target</div>
+      <br>
+      <div class="f-line"><span class="f-comment"># Ask the alignment question:</span></div>
+      <div class="f-line"><span class="f-var">Did this week's work move any KR forward?</span></div>
+      <div class="f-line">  → If yes: continue</div>
+      <div class="f-line">  → If no: identify which DW block next week addresses a KR</div>
+      <br>
+      <div class="f-comment"># Red flag: 2+ consecutive weeks with no KR movement = structural misalignment</div>
+    </div>
+
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="side-col">
+    <div class="sidebar-box">
+      <div class="sidebar-label">On this page</div>
+      <a class="sidebar-link" href="#"><span class="sl-num">01</span> What & Why</a>
+      <a class="sidebar-link" href="#"><span class="sl-num">02</span> Architecture</a>
+      <a class="sidebar-link" href="#"><span class="sl-num">03</span> Real Examples</a>
+      <a class="sidebar-link" href="#"><span class="sl-num">04</span> Failure Modes</a>
+      <a class="sidebar-link" href="#"><span class="sl-num">05</span> Weekly Integration</a>
+    </div>
+
+    <div class="sidebar-box">
+      <div class="sidebar-label">Related Pages</div>
+      <a class="related-link" href="weekly-review.html">Weekly Review Protocol</a>
+      <a class="related-link" href="quarterly-review.html">Quarterly Review</a>
+      <a class="related-link" href="index.html">← Back to Personal OS</a>
+    </div>
+
+    <div class="sidebar-box" style="background:var(--ink);border-color:#333;">
+      <div class="sidebar-label" style="color:#666;">Quick Reference</div>
+      <div style="font-family:var(--mono);font-size:11px;color:#888;line-height:2;">
+        <div style="color:var(--accent);">Per Quarter</div>
+        <div>Objectives: <span style="color:#eee;">1–3</span></div>
+        <div>Key Results: <span style="color:#eee;">3–8 total</span></div>
+        <div>Target score: <span style="color:#eee;">0.6–0.7</span></div>
+        <br>
+        <div style="color:var(--accent);">Review cadence</div>
+        <div>Weekly: <span style="color:#eee;">5 min check</span></div>
+        <div>Monthly: <span style="color:#eee;">30 min update</span></div>
+        <div>Quarterly: <span style="color:#eee;">2hr full reset</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<nav class="page-nav">
+  <a href="index.html" class="nav-link">
+    <span class="nl-label">← Back</span>
+    <span class="nl-title">Personal OS Home</span>
+  </a>
+  <a href="weekly-review.html" class="nav-link right">
+    <span class="nl-label">Next →</span>
+    <span class="nl-title">Weekly Review Protocol</span>
+  </a>
+</nav>
+
+</body>
+</html>
